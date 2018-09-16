@@ -1,0 +1,3 @@
+[submodule "WheelerRobotics/src/main/java/org/wheelerschool/robotics/robotlib"]
+	path = WheelerRobotics/src/main/java/org/wheelerschool/robotics/robotlib
+	url = https://github.com/wheelerrobotics/robotlib.git
