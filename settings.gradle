@@ -1,2 +1,4 @@
 include ':FtcRobotController'
 include ':WheelerRobotics'
+include ':openCVLibrary3'
+include ':DogeCV'

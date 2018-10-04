@@ -34,14 +34,9 @@ android {
 
     defaultConfig {
         applicationId 'com.qualcomm.ftcrobotcontroller'
-        // IMPORTANT: 'nd4j' requires newer target OS:
-        minSdkVersion 21
-        targetSdkVersion 23
-
-        // OLD SETTINGS:
-        //minSdkVersion 19
-        //targetSdkVersion 19
-
+        minSdkVersion 19
+        targetSdkVersion 19
+        multiDexEnabled true
 
         /**
          * We keep the versionCode and versionName of robot controller applications in sync with
@@ -107,18 +102,5 @@ repositories {
     flatDir {
         dirs rootProject.file('libs')
     }
-
-    mavenCentral()
 }
-
-dependencies {
-    // https://mvnrepository.com/artifact/org.nd4j/nd4j-api
-    compile group: 'org.nd4j', name: 'nd4j-api', version: '1.0.0-beta2'
-}
-
-configurations {
-    // Fix for ND4J caused gson errors:
-    all*.exclude group: 'com.google.code.gson'
-}
-
 apply from: 'build.release.gradle'
