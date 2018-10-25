@@ -13,6 +13,7 @@ apply from: '../build.common.gradle'
 dependencies {
     implementation project(':openCVLibrary3')
     implementation project(':DogeCV')
+    implementation 'org.jblas:jblas:1.2.4'
 }
 
 repositories {
