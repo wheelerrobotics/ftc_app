@@ -103,4 +103,4 @@ repositories {
         dirs rootProject.file('libs')
     }
 }
-apply from: 'build.release.gradle'
+apply from: '../WheelerRobotics/build.release.gradle'

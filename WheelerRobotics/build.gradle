@@ -11,9 +11,9 @@
 // Include common definitions from above.
 apply from: '../build.common.gradle'
 dependencies {
+    api 'org.jblas:jblas:1.2.4'
     implementation project(':openCVLibrary3')
     implementation project(':DogeCV')
-    implementation 'org.jblas:jblas:1.2.4'
 }
 
 repositories {
