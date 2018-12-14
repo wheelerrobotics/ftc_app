@@ -1,1 +1,7 @@
 apply from: '../WheelerRobotics/build.gradle'
+
+android {
+    sourceSets {
+        main.java.srcDirs += project(":WheelerRobotics").projectDir.path + "/src/main/java"
+    }
+}
