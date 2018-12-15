@@ -47,12 +47,12 @@ public class Hardware {
 
         DcMotor fl = hw.dcMotor.get("drive-+");  // Front left
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
-        DcMotor br = hw.dcMotor.get("drive--");  // Back left
-        br.setDirection(DcMotorSimple.Direction.REVERSE);
+        DcMotor bl= hw.dcMotor.get("drive--");  // Back left
+        bl.setDirection(DcMotorSimple.Direction.REVERSE);
         drive = new MechanumDrive4x(
                 fl,  // Front left
-                br,  // Front right
-                hw.dcMotor.get("drive--"),  // Back left
+                hw.dcMotor.get("drive++"),  // Front right
+                bl,  // Back left
                 hw.dcMotor.get("drive+-")  // Back right
         );
 
