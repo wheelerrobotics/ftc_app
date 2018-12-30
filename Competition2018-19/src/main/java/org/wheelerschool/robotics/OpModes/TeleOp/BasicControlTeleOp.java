@@ -1,4 +1,4 @@
-package org.wheelerschool.robotics.TeleOp;
+package org.wheelerschool.robotics.OpModes.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
