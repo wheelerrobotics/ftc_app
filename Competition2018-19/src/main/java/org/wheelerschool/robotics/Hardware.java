@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.wheelerschool.robotics.robotlib.motion.MechanumDrive;
 import org.wheelerschool.robotics.robotlib.motion.MechanumDrive4x;
 import org.wheelerschool.robotics.robotlib.motion.MotorGroup;
+import org.wheelerschool.robotics.robotlib.motion.PositionalMotor;
 import org.wheelerschool.robotics.robotlib.motion.ServoTwoPos;
 import org.wheelerschool.robotics.robotlib.motion.SyncedServo;
 
@@ -26,7 +27,7 @@ public class Hardware {
     public MotorGroup intakeDrive;
 
     // Lift:
-    public DcMotor lift;
+    public PositionalMotor lift;
 
     // Drop:
     public ServoTwoPos drop;
@@ -93,7 +94,8 @@ public class Hardware {
         intakeDrive.add(intakeR);
 
         // Lift:
-        lift = hw.dcMotor.get("lift");
+        lift = new PositionalMotor(hw.dcMotor.get("lift"), new int[]{0, 6200});
+        lift.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Drop:
         drop = new ServoTwoPos(hw.servo.get("drop"), 0, 180);
