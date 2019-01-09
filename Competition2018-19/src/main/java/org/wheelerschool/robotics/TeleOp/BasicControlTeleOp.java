@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.wheelerschool.robotics.Hardware;
 import org.wheelerschool.robotics.robotlib.util.joystick.CumulativeControl;
+import org.wheelerschool.robotics.robotlib.util.joystick.JoystickButtonUpdated;
 
 @TeleOp(name="Control")
 public class BasicControlTeleOp extends OpMode {
@@ -16,6 +17,7 @@ public class BasicControlTeleOp extends OpMode {
 
     // Joystick:
     CumulativeControl intakeAngle;
+
     @Override
     public void init() {
         robot = new Hardware(hardwareMap);
@@ -49,5 +51,20 @@ public class BasicControlTeleOp extends OpMode {
         }
 
         robot.intakeDrive.setPower(intakeDrive);
+
+        float liftPower = 1;
+        if (gamepad1.dpad_up) {
+            robot.lift.setPower(liftPower);
+        } else if (gamepad1.dpad_down) {
+                robot.lift.setPower(-liftPower);
+        } else {
+            robot.lift.setPower(0);
+        }
+
+        if (gamepad2.a) {
+            robot.drop.setState(true);
+        } else {
+            robot.drop.setState(false);
+        }
     }
 }
