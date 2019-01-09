@@ -24,6 +24,9 @@ public class Hardware {
     public SyncedServo intakeAngle;
     public MotorGroup intakeDrive;
 
+    // Lift:
+    public DcMotor lift;
+
 
     public Hardware(HardwareMap hw) {
         // Drive:
@@ -86,5 +89,7 @@ public class Hardware {
         intakeDrive.add(intakeL);
         intakeDrive.add(intakeR);
 
+        // Lift:
+        lift = hw.dcMotor.get("lift");
     }
 }
