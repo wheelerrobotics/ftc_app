@@ -1,11 +1,10 @@
-package org.wheelerschool.robotics.TeleOp;
+package org.wheelerschool.robotics.OpModes.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.wheelerschool.robotics.Hardware;
 import org.wheelerschool.robotics.robotlib.util.joystick.CumulativeControl;
-import org.wheelerschool.robotics.robotlib.util.joystick.JoystickButtonUpdated;
 
 @TeleOp(name="Control")
 public class BasicControlTeleOp extends OpMode {
