@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.wheelerschool.robotics.robotlib.motion.MechanumDrive;
 import org.wheelerschool.robotics.robotlib.motion.MechanumDrive4x;
 import org.wheelerschool.robotics.robotlib.motion.MotorGroup;
+import org.wheelerschool.robotics.robotlib.motion.ServoTwoPos;
 import org.wheelerschool.robotics.robotlib.motion.SyncedServo;
 
 public class Hardware {
@@ -27,6 +28,8 @@ public class Hardware {
     // Lift:
     public DcMotor lift;
 
+    // Drop:
+    public ServoTwoPos drop;
 
     public Hardware(HardwareMap hw) {
         // Drive:
@@ -91,5 +94,8 @@ public class Hardware {
 
         // Lift:
         lift = hw.dcMotor.get("lift");
+
+        // Drop:
+        drop = new ServoTwoPos(hw.servo.get("drop"), 0, 180);
     }
 }
