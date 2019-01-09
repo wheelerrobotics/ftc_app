@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.wheelerschool.robotics.robotlib.motion.MechanumDrive;
 import org.wheelerschool.robotics.robotlib.motion.MechanumDrive4x;
 import org.wheelerschool.robotics.robotlib.motion.MotorGroup;
+import org.wheelerschool.robotics.robotlib.motion.PositionalMotor;
+import org.wheelerschool.robotics.robotlib.motion.ServoTwoPos;
 import org.wheelerschool.robotics.robotlib.motion.SyncedServo;
 
 public class Hardware {
@@ -28,9 +30,14 @@ public class Hardware {
     public SyncedServo intakeAngle;
     public MotorGroup intakeDrive;
 
+    // Lift:
+    public PositionalMotor lift;
+
+    // Drop:
+    public ServoTwoPos drop;
+
     // Robot IMU:
     public BNO055IMU imu;
-
 
     private void MotorConfig(HardwareMap hw) {
         // Drive:
@@ -93,6 +100,12 @@ public class Hardware {
         intakeDrive.add(intakeL);
         intakeDrive.add(intakeR);
 
+        // Lift:
+        lift = new PositionalMotor(hw.dcMotor.get("lift"), new int[]{0, 6200});
+        lift.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Drop:
+        drop = new ServoTwoPos(hw.servo.get("drop"), 0, 180);
     }
 
     private void SensorConfig(HardwareMap hw) {

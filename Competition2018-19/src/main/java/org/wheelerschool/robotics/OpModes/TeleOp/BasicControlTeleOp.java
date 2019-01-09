@@ -16,6 +16,11 @@ public class BasicControlTeleOp extends OpMode {
 
     // Joystick:
     CumulativeControl intakeAngle;
+
+    private void debugPrint() {
+        telemetry.addData("Lift", robot.lift.dcMotor.getCurrentPosition());
+    }
+
     @Override
     public void init() {
         robot = new Hardware(hardwareMap);
@@ -49,5 +54,22 @@ public class BasicControlTeleOp extends OpMode {
         }
 
         robot.intakeDrive.setPower(intakeDrive);
+
+        float liftPower = 1;
+        if (gamepad1.dpad_up) {
+            robot.lift.manualOverride(liftPower);
+        } else if (gamepad1.dpad_down) {
+                robot.lift.manualOverride(-liftPower);
+        } else {
+            robot.lift.stop();
+        }
+
+        if (gamepad2.a) {
+            robot.drop.setState(true);
+        } else {
+            robot.drop.setState(false);
+        }
+
+        debugPrint();
     }
 }
