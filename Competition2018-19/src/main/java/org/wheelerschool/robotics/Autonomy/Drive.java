@@ -1,39 +1,58 @@
 package org.wheelerschool.robotics.Autonomy;
 
+import android.util.Log;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.wheelerschool.robotics.Hardware;
 
 public class Drive {
-    Main a;
-    public Drive(Main a) {
-        this.a = a;
+    float ANGLE_DB = 1.f * (float) Math.PI/180.f;  // Angle deadband (deg)
+    float ANGLE_MAX = 30.f * (float) Math.PI/180.f;  // Angle separation for which max rotation is applied (deg)
+    AxesOrder IMU_ORDER = AxesOrder.ZYX;
+
+    Hardware r;
+    public Drive(Hardware r) {
+        this.r = r;
     }
     public void hault() {
-        a.r.drive.updateMotors(0, 0, 0);
+        r.drive.updateMotors(0, 0, 0);
     }
 
     public float anglePower(Orientation start, float angle) {
-        Orientation current = a.r.imu.getAngularOrientation().toAxesOrder(a.IMU_ORDER);
-        float sep = start.firstAngle - current.firstAngle;
+        Orientation current = r.imu.getAngularOrientation().toAxesOrder(this.IMU_ORDER);
+        float currentChange = current.firstAngle - start.firstAngle;
 
-        float power;
-        if (sep > a.ANGLE_MAX) {
-            power = 1;
-        } else if (Math.abs(sep) > a.ANGLE_DB) {
-            power = 0;
-        } else {
-            power = sep / a.ANGLE_MAX;
+        float sep = angle - currentChange;
+
+        if (sep < -Math.PI) {
+            sep += 2*Math.PI;
+        } else if (sep > Math.PI) {
+            sep -= 2*Math.PI;
         }
 
+        float power;
+        if (Math.abs(sep) > this.ANGLE_MAX) {
+            power = Math.copySign(1, sep);
+        } else if (Math.abs(sep) < this.ANGLE_DB) {
+            power = 0;
+        } else {
+            power = sep / this.ANGLE_MAX;
+        }
+
+        Log.d("auto", String.format("change: %f, delta: %f, power: %f", currentChange, sep, power));
         return power;
     }
 
 
     public void turnAngle(float angle, float gain) {
-        Orientation start = a.r.imu.getAngularOrientation().toAxesOrder(a.IMU_ORDER);
+        Orientation start = r.imu.getAngularOrientation().toAxesOrder(this.IMU_ORDER);
+        Log.d("auto", "First");
         float power;
         do {
+            Log.d("auto", "Here");
             power = anglePower(start, angle) * gain;
-            a.r.drive.updateMotors(0, 0, power);
+            r.drive.updateMotors(0, 0, power);
         } while (power != 0);
 
         hault();

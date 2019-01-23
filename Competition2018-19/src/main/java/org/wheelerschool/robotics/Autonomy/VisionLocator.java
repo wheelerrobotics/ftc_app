@@ -41,6 +41,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -94,6 +95,7 @@ public class VisionLocator {
     public static final String TAG = "Vuforia Location";
 
     //  Vuforia:
+    WebcamName webcamName;
     VuforiaLocalizer vuforia;
     VuforiaTrackables visionDataset = null;
     Map<String, VuforiaTrackable> trackables = null;
@@ -113,8 +115,10 @@ public class VisionLocator {
         int cameraMonitorViewId = hw.appContext.getResources()
                 .getIdentifier("cameraMonitorViewId", "id", hw.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        webcamName = hw.get(WebcamName.class, "Webcam 1");
         parameters.vuforiaLicenseKey = Config.VUFORIA_KEY;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        parameters.cameraName = webcamName;
+        //parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
         // Load trackables:

@@ -1,6 +1,7 @@
 package org.wheelerschool.robotics;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.bosch.NaiveAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -24,7 +25,7 @@ public class Hardware {
 
     // Arm:
     public DcMotor armAngle;
-    public DcMotor armExt;
+    public PositionalMotor armExt;
 
     // End-fixture:
     public SyncedServo intakeAngle;
@@ -61,17 +62,19 @@ public class Hardware {
 
         DcMotor fl = hw.dcMotor.get("drive-+");  // Front left
         fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
+        fl.setDirection(DcMotorSimple.Direction.FORWARD);
 
         DcMotor bl= hw.dcMotor.get("drive--");  // Back left
         bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bl.setDirection(DcMotorSimple.Direction.REVERSE);
+        bl.setDirection(DcMotorSimple.Direction.FORWARD);
 
         DcMotor fr = hw.dcMotor.get("drive++");
         fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fr.setDirection(DcMotorSimple.Direction.REVERSE);
 
         DcMotor br = hw.dcMotor.get("drive+-");
         br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        br.setDirection(DcMotorSimple.Direction.REVERSE);
 
         drive = new MechanumDrive4x(
                 fl,  // Front left
@@ -83,7 +86,9 @@ public class Hardware {
 
         // Arm:
         armAngle = hw.dcMotor.get("armAngle");
-        armExt = hw.dcMotor.get("armExt");
+        armExt = new PositionalMotor(hw.dcMotor.get("armExt"), new int[]{0});
+        armExt.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armExt.dcMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Intake:
         //  Angle:
@@ -101,7 +106,7 @@ public class Hardware {
         intakeDrive.add(intakeR);
 
         // Lift:
-        lift = new PositionalMotor(hw.dcMotor.get("lift"), new int[]{0, 6200});
+        lift = new PositionalMotor(hw.dcMotor.get("lift"), new int[]{0, 6290});
         lift.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Drop:
@@ -109,14 +114,19 @@ public class Hardware {
     }
 
     private void SensorConfig(HardwareMap hw) {
-        imu = hw.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.RADIANS;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = false;
+        parameters.loggingEnabled      = true;
         parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = null; // Will use default, internal one
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hw.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
     }
 
 

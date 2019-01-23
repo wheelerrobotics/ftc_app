@@ -6,16 +6,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.wheelerschool.robotics.Hardware;
 
-@Autonomous(name = "RESET")
-public class EncoderReset extends LinearOpMode {
+@Autonomous(name = "RETRACT")
+public class Retract extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Hardware r = new Hardware(hardwareMap);
 
-        waitForStart();
+        r.lift.moveTo(0, 0.5);
 
-        r.armExt.dcMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        r.armAngle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        r.lift.dcMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        waitForStart();
     }
 }

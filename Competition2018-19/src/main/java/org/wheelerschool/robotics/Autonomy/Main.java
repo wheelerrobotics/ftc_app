@@ -5,6 +5,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.wheelerschool.robotics.Hardware;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
@@ -13,13 +15,12 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 public class Main {
-    float ANGLE_DB = 1;  // Angle deadband (deg)
-    float ANGLE_MAX = 30;  // Angle separation for which max rotation is applied (deg)
-    AxesOrder IMU_ORDER = AxesOrder.XYZ;
-
     Hardware r;
 
-    VisionLocator locator;
+    public VisionLocator locator;
+    public VisionDecoder decoder;
+
+    public Drive drive;
 
 
     /* --- Setup Functions --- */
@@ -34,6 +35,7 @@ public class Main {
                         90, 0, 0));
 
         this.locator = new VisionLocator(this.r.hw, cameraOffset);
+        this.decoder = new VisionDecoder(this.r.hw, this.locator);
     }
 
 
@@ -42,11 +44,14 @@ public class Main {
     public Main(Hardware robot) {
         this.r = robot;
 
+        drive = new Drive(r);
         setupVision();
     }
 
     /** Enable autonomy systems */
     public void enable() {
         this.locator.enable();
+        this.decoder.enable();
+        //r.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
     }
 }

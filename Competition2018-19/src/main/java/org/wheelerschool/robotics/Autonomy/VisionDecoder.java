@@ -19,11 +19,17 @@ public class VisionDecoder {
     /**
      * Position of gold mineral.
      */
-    enum Position {
+    public enum Position {
         LEFT,
         CENTER,
         RIGHT,
         UNKNOWN
+    }
+
+    public enum Mineral {
+        GOLD,
+        SILVER,
+        NONE
     }
 
     private TFObjectDetector tfod;
@@ -49,11 +55,11 @@ public class VisionDecoder {
     }
 
     /**
-     * Run TF object detection frame
+     * Run TF object detection frame, with order of three minerals in frame
      *
      * @return Position: Position of gold mineral.
      */
-    public Position update() {
+    public Position frameCompare3() {
         // Read recognized objects:
         List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
 
@@ -90,6 +96,49 @@ public class VisionDecoder {
         }
 
         return Position.UNKNOWN;  // Default, if did not complete all prior steps
+    }
+
+    public Mineral frameDetectedMineral() {
+        // Read recognized objects:
+        List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+
+        // Ensure only 3 objects were detected:
+        if (updatedRecognitions != null && updatedRecognitions.size()>0) {
+            Recognition bestReco = null;  // Best recognition
+            float bestConf = 0;  // Best recognition confidence
+
+            for (Recognition r : updatedRecognitions) {
+                float c = r.getConfidence();
+                if (c > bestConf) {
+                    bestReco = r;
+                    bestConf = c;
+                }
+            }
+
+            if (bestReco.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                return Mineral.GOLD;
+            } else if (bestReco.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                return Mineral.SILVER;
+            }
+        }
+        return Mineral.NONE;
+    }
+
+    public Mineral frameDetectsGold() {
+        // Read recognized objects:
+        List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+
+        float CONF_THRESH = 0.3f;
+        // Ensure only 3 objects were detected:
+        if (updatedRecognitions != null && updatedRecognitions.size()>0) {
+            for (Recognition r : updatedRecognitions) {
+                float c = r.getConfidence();
+                if (r.getLabel().equals(LABEL_GOLD_MINERAL) && c > CONF_THRESH) {
+                    return Mineral.GOLD;
+                }
+            }
+        }
+        return Mineral.NONE;
     }
 
     /**
