@@ -1,4 +1,4 @@
-package org.wheelerschool.robotics.OpModes.Auto;
+package org.wheelerschool.robotics.OpModes.Testing.Auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
