@@ -62,19 +62,19 @@ public class Hardware {
 
         DcMotor fl = hw.dcMotor.get("drive-+");  // Front left
         fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fl.setDirection(DcMotorSimple.Direction.FORWARD);
+        fl.setDirection(DcMotorSimple.Direction.REVERSE);
 
         DcMotor bl= hw.dcMotor.get("drive--");  // Back left
         bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bl.setDirection(DcMotorSimple.Direction.FORWARD);
+        bl.setDirection(DcMotorSimple.Direction.REVERSE);
 
         DcMotor fr = hw.dcMotor.get("drive++");
         fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fr.setDirection(DcMotorSimple.Direction.REVERSE);
+        fr.setDirection(DcMotorSimple.Direction.FORWARD);
 
         DcMotor br = hw.dcMotor.get("drive+-");
         br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        br.setDirection(DcMotorSimple.Direction.REVERSE);
+        br.setDirection(DcMotorSimple.Direction.FORWARD);
 
         drive = new MechanumDrive4x(
                 fl,  // Front left
