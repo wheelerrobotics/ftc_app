@@ -97,6 +97,7 @@ public class BasicControlTeleOp extends OpMode {
 
         robot.intakeDrive.setPower(intakeDrive);
 
+        // Lift Control:
         float liftGain = 1;
         if (gamepad1.right_bumper) {
             robot.lift.manualOverride(liftGain);
