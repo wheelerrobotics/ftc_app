@@ -16,6 +16,8 @@ import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.*;
  * Wrapper for TensorFlow lite built-in libraries.
  */
 public class VisionDecoder {
+    final int FRAME_WIDTH = 625; // Approximate from testing
+
     /**
      * Position of gold mineral.
      */
@@ -23,6 +25,7 @@ public class VisionDecoder {
         LEFT,
         CENTER,
         RIGHT,
+        NONE,
         UNKNOWN
     }
 
@@ -139,6 +142,58 @@ public class VisionDecoder {
             }
         }
         return Mineral.NONE;
+    }
+
+    public Position frameDetectedDualMineral() {
+        return frameDetectedDualMineral(true);
+    }
+    public Position frameDetectedDualMineral(boolean hanging) {
+        // Read recognized objects:
+        List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+
+        float CONF_THRESH = 0.3f;
+
+        // Filter objects below threshold:
+        if (updatedRecognitions != null) {
+            for (int idx = updatedRecognitions.size() - 1; idx >= 0; idx--) {
+                Recognition r = updatedRecognitions.get(idx);
+                if (r.getConfidence() < CONF_THRESH) {
+                    updatedRecognitions.remove(idx);
+                } else if (hanging) {  // Conditions specific to hanging situation
+                    if (r.getBottom() < 150) { // This is roughly below the line of the crater, to remove/ignore all objects behind it
+                        updatedRecognitions.remove(idx);
+                    }
+                }
+            }
+
+            // Ensure only 2 objects were detected:
+            Recognition left = null;
+            Recognition right = null;
+            if (updatedRecognitions != null && updatedRecognitions.size() == 2) {
+                for (Recognition r : updatedRecognitions) {
+                    if (left == null) {
+                        left = r;
+                    } else {
+                        if (left.getLeft() > r.getLeft()) {
+                            right = left;
+                            left = r;
+                        } else {
+                            right = r;
+                        }
+                    }
+                }
+
+                if (left.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                    return Position.LEFT;
+                } else if (right.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                    return Position.RIGHT;
+                } else {
+                    return Position.NONE;
+                }
+            }
+        }
+
+        return Position.UNKNOWN;
     }
 
     /**
