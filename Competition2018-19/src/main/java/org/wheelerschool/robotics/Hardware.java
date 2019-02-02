@@ -40,6 +40,12 @@ public class Hardware {
     // Robot IMU:
     public BNO055IMU imu;
 
+    private DcMotor setupMotor(DcMotor m, DcMotorSimple.Direction d) {
+        m.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m.setDirection(d);
+        m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        return m;
+    }
     private void MotorConfig(HardwareMap hw) {
         // Drive:
         /*
@@ -59,28 +65,11 @@ public class Hardware {
                 );
         */
 
-
-        DcMotor fl = hw.dcMotor.get("drive-+");  // Front left
-        fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        DcMotor bl= hw.dcMotor.get("drive--");  // Back left
-        bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bl.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        DcMotor fr = hw.dcMotor.get("drive++");
-        fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fr.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        DcMotor br = hw.dcMotor.get("drive+-");
-        br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        br.setDirection(DcMotorSimple.Direction.FORWARD);
-
         drive = new MechanumDrive4x(
-                fl,  // Front left
-                fr,  // Front right
-                bl,  // Back left
-                br  // Back right
+                setupMotor(hw.dcMotor.get("drive-+"), DcMotorSimple.Direction.REVERSE),  // Front left
+                setupMotor(hw.dcMotor.get("drive++"), DcMotorSimple.Direction.FORWARD),  // Front right
+                setupMotor(hw.dcMotor.get("drive--"), DcMotorSimple.Direction.REVERSE),  // Back left
+                setupMotor(hw.dcMotor.get("drive+-"), DcMotorSimple.Direction.FORWARD)  // Back right
         );
 
 
