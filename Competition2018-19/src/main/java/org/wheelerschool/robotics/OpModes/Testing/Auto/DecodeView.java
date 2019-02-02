@@ -9,7 +9,6 @@ import org.wheelerschool.robotics.Autonomy.VisionDecoder;
 import org.wheelerschool.robotics.Hardware;
 
 @Autonomous
-@Disabled
 public class DecodeView extends OpMode {
     Main auto;
 
@@ -49,7 +48,7 @@ public class DecodeView extends OpMode {
             }
         }
 
-        if (true) {
+        if (false) {
             VisionDecoder.Mineral m = auto.decoder.frameDetectedMineral();
 
             switch (m) {
@@ -58,6 +57,25 @@ public class DecodeView extends OpMode {
                     break;
                 case SILVER:
                     telemetry.addData("min", "silver");
+                    break;
+            }
+        }
+
+        if (true) {
+            VisionDecoder.Position gp = auto.decoder.frameDetectedDualMineral(true);
+
+            switch (gp) {
+                case LEFT:
+                    telemetry.addData("pos", "left");
+                    break;
+                case RIGHT:
+                    telemetry.addData("pos", "middle");
+                    break;
+                case NONE:
+                    telemetry.addData("pos", "not seen (right)");
+                    break;
+                case UNKNOWN:
+                    //telemetry.addData("pos", "err");
                     break;
             }
         }
