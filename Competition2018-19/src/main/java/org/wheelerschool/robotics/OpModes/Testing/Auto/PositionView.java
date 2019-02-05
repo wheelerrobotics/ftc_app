@@ -2,7 +2,7 @@ package org.wheelerschool.robotics.OpModes.Testing.Auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.wheelerschool.robotics.Autonomy.Main;
@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 @Autonomous
 @Disabled
-public class PositionView extends OpMode {
+public class PositionView extends LinearOpMode {
     Main auto;
 
     public PositionView() {
@@ -22,25 +22,21 @@ public class PositionView extends OpMode {
     }
 
     @Override
-    public void init() {
+    public void runOpMode() throws InterruptedException {
         Hardware hw = new Hardware(hardwareMap);
-        auto = new Main(hw);
-    }
+        auto = new Main(hw, this);
 
-    @Override
-    public void start() {
+        waitForStart();
+
         auto.enable();
-    }
-
-    @Override
-    public void loop() {
-        auto.locator.readData();
-        OpenGLMatrix loc = auto.locator.lastLocation;
-        if (loc != null) {
-            telemetry.addData("Position", Arrays.toString(loc.getTranslation().getData()));
-        } else {
-            //telemetry.addData("Position", "None");
+        while (opModeIsActive()) {
+            auto.locator.readData();
+            OpenGLMatrix loc = auto.locator.lastLocation;
+            if (loc != null) {
+                telemetry.addData("Position", Arrays.toString(loc.getTranslation().getData()));
+            } else {
+                //telemetry.addData("Position", "None");
+            }
         }
-
     }
 }

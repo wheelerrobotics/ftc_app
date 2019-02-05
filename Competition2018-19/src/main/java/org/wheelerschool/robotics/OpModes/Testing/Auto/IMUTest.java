@@ -16,7 +16,7 @@ public class IMUTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         hw = new Hardware(hardwareMap);
-        auto = new Main(hw);
+        auto = new Main(hw, this);
         //auto.enable();
 
         waitForStart();

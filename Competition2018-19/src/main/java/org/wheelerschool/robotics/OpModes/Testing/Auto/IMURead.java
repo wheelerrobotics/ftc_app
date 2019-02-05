@@ -16,7 +16,7 @@ public class IMURead extends LinearOpMode {
     @Override
     public void runOpMode() {
         hw = new Hardware(hardwareMap);
-        auto = new Main(hw);
+        auto = new Main(hw, this);
         auto.enable();
 
         telemetry.addData("State", "READY");

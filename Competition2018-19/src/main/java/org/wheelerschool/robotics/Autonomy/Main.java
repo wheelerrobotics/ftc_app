@@ -1,5 +1,7 @@
 package org.wheelerschool.robotics.Autonomy;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -41,10 +43,10 @@ public class Main {
 
     /* --- Public functions --- */
     /** Constructor */
-    public Main(Hardware robot) {
+    public Main(Hardware robot, LinearOpMode linearOpMode) {
         this.r = robot;
 
-        drive = new Drive(r);
+        drive = new Drive(r, linearOpMode);
         setupVision();
     }
 

@@ -2,6 +2,7 @@ package org.wheelerschool.robotics.Autonomy;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.wheelerschool.robotics.Hardware;
@@ -11,8 +12,11 @@ public class Drive {
     float ANGLE_MAX = 30.f * (float) Math.PI/180.f;  // Angle separation for which max rotation is applied (deg)
     AxesOrder IMU_ORDER = AxesOrder.ZYX;
 
+    LinearOpMode linearOpMode;
+
     Hardware r;
-    public Drive(Hardware r) {
+    public Drive(Hardware r, LinearOpMode linearOpMode) {
+        this.linearOpMode = linearOpMode;
         this.r = r;
     }
     public void hault() {
@@ -53,7 +57,7 @@ public class Drive {
             Log.d("auto", "Here");
             power = anglePower(start, angle) * gain;
             r.drive.updateMotors(0, 0, power);
-        } while (power != 0);
+        } while (power != 0 && linearOpMode.opModeIsActive());
 
         hault();
     }
