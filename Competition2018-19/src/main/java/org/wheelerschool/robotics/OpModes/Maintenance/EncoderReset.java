@@ -17,5 +17,9 @@ public class EncoderReset extends LinearOpMode {
         r.armExt.dcMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         r.armAngle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         r.lift.dcMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        for (DcMotor dc : r.drive.getMotors()) {
+            dc.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
     }
 }
