@@ -3,13 +3,13 @@ package org.wheelerschool.robotics.OpModes.Auto;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.wheelerschool.robotics.Autonomy.Main;
 import org.wheelerschool.robotics.Autonomy.VisionDecoder;
 import org.wheelerschool.robotics.Hardware;
 
 @Autonomous
 public class FullAuto extends LinearOpMode {
+    float STRAIGHT_DRIVE_PWR = 1.f;
     Hardware hw;
     Main auto;
 
@@ -29,51 +29,92 @@ public class FullAuto extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
+        VisionDecoder.Position goldCam = null;
+        for (int i=0; i<50; i++) {
+            goldCam = auto.decoder.frameDetectedDualMineral(true);
+
+            if (goldCam != VisionDecoder.Position.NONE) break;
+        }
+
+        VisionDecoder.Position goldPosition = null;
+
+        switch (goldCam) {  // Position in field
+            case LEFT:
+                telemetry.addData("Position", "LEFT");
+                goldPosition = VisionDecoder.Position.LEFT;
+                break;
+            case RIGHT:
+                telemetry.addData("Position", "CENTER");
+                goldPosition = VisionDecoder.Position.CENTER;
+                break;
+            case UNKNOWN:
+                telemetry.addData("Position", "RIGHT");
+                goldPosition = VisionDecoder.Position.RIGHT;
+                break;
+            case NONE:
+                telemetry.addData("Position", "ERR");
+                goldPosition = VisionDecoder.Position.CENTER;  // DEFAULT
+                break;
+        }
+        telemetry.update();
+
         hw.lift.moveTo(1, 1);
 
-        Thread.sleep(5000);
+        Thread.sleep(3000);
 
-        hw.drive.updateMotors(0, 1, 0);
-        Thread.sleep(300);
-        hw.drive.updateMotors(0, 0, 0);
+        auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 100);  // UNHOOK
 
         auto.drive.turnAngle((float) -Math.PI/2.f, 0.75f);
         hw.lift.moveTo(0, 0.75f);
         Thread.sleep(500);
 
-        // Drive fwd to narrow FOV of camera for sampling
-        hw.drive.updateMotors(0, 0.7f, 0);
-        Thread.sleep(400);
-
-        int mineralStep = 0;
-        for (; mineralStep<3; mineralStep++) {
-            boolean goldDetected = false;
-            for (int i=0; i<50; i++) {
-                if (auto.decoder.frameDetectedMineral() == VisionDecoder.Mineral.GOLD) {
-                    goldDetected = true;
-                    break;
-                }
+        if (goldPosition == VisionDecoder.Position.CENTER) {
+            auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 680);
+            auto.drive.turnAngle((float) Math.PI, 0.75f);
+        } else {
+            auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 80);
+            int moveSign;
+            if (goldPosition == VisionDecoder.Position.LEFT) {
+                moveSign = 1;
+            } else if (goldPosition == VisionDecoder.Position.RIGHT) {
+                moveSign = -1;
+            } else {
+                throw new InterruptedException("Position logic failure!");
             }
 
-            // Skip rotate for next position if gold detected or is last mineral step
-            if (goldDetected || mineralStep == 2) {
-                break;
+            float mineralAlignAngle;
+            int mineralDriveDistance;
+            if (moveSign > 0) {  // LEFT
+                mineralAlignAngle = ((float) Math.PI/4.f)-0.1f;  // MEASURED ANGLE
+                mineralDriveDistance = 1015;
+            } else {  // RIGHT
+                mineralAlignAngle = -0.4286f;  // MEASURED ANGLE
+                mineralDriveDistance = 750;
             }
+            auto.drive.turnAngle(mineralAlignAngle, 0.75f);
+            auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, mineralDriveDistance);
 
-            auto.drive.turnAngle((float) -Math.PI/6.f, 0.75f);
-            Thread.sleep(500);
+            if (moveSign > 0) {  // LEFT
+                auto.drive.turnAngle(((float) Math.PI) / 2.f + 0.314f, 0.75f);
+                auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -450);
+            } else {  // RIGHT
+                auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -250);
+                auto.drive.turnAngle(-((float) Math.PI) / 4.f, 0.75f);
+                auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -1350);
+                auto.drive.turnAngle(-3.f*((float) Math.PI) / 4.f, 0.75f);
+
+                // SLAM WALL ALIGN
+                hw.drive.updateMotors(0.5f,0,0);
+                Thread.sleep(2000);
+                hw.drive.updateMotors(-0.5f,0,0);
+                Thread.sleep(500);
+                hw.drive.updateMotors(0f,0,0);
+
+                auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -1300);
+            }
+            auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 1600);
         }
 
-        telemetry.addData("Selected Angle", mineralStep);
-        telemetry.update();
 
-        auto.drive.turnAngle((float) Math.PI/6.f, 0.75f);
-        Thread.sleep(500);
-
-        hw.drive.updateMotors(0, 0.7f, 0);
-        Thread.sleep(3000);
-
-        hw.drive.updateMotors(0, -0.7f, 0);
-        Thread.sleep(500);
     }
 }
