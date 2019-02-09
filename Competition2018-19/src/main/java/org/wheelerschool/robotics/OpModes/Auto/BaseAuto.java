@@ -1,42 +1,37 @@
 package org.wheelerschool.robotics.OpModes.Auto;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.wheelerschool.robotics.Autonomy.Main;
 import org.wheelerschool.robotics.Autonomy.VisionDecoder;
 import org.wheelerschool.robotics.Hardware;
 
-@Autonomous
-public class FullAuto extends LinearOpMode {
+public abstract class BaseAuto extends LinearOpMode {
     float STRAIGHT_DRIVE_PWR = 1.f;
+    float ROTATE_DRIVE_PWR = 1.f;
+
+    public int CENTER_MINERAL_DISTANCE;
+    public int LEFT_MINERAL_DISTANCE;
+
     Hardware hw;
     Main auto;
 
+    VisionDecoder.Position goldPosition = null;
+
     private void initHW() {
+        hw.armExt.moveTo(0, 0.5);
+        hw.armAngle.moveTo(0, 0.5);
         hw.lift.moveTo(0, 0.5);
+        hw.drop.setState(false);
     }
 
-    @Override
-    public void runOpMode() throws InterruptedException {
-        hw = new Hardware(hardwareMap);
-        auto = new Main(hw, this);
-        auto.enable();
-
-        initHW();
-
-        telemetry.addData("State", "READY");
-        telemetry.update();
-        waitForStart();
-
+    protected void stageDrop() throws InterruptedException {
         VisionDecoder.Position goldCam = null;
         for (int i=0; i<50; i++) {
             goldCam = auto.decoder.frameDetectedDualMineral(true);
 
-            if (goldCam != VisionDecoder.Position.NONE) break;
+            if (goldCam != VisionDecoder.Position.UNKNOWN) break;
         }
-
-        VisionDecoder.Position goldPosition = null;
 
         switch (goldCam) {  // Position in field
             case LEFT:
@@ -47,11 +42,11 @@ public class FullAuto extends LinearOpMode {
                 telemetry.addData("Position", "CENTER");
                 goldPosition = VisionDecoder.Position.CENTER;
                 break;
-            case UNKNOWN:
+            case NONE:
                 telemetry.addData("Position", "RIGHT");
                 goldPosition = VisionDecoder.Position.RIGHT;
                 break;
-            case NONE:
+            case UNKNOWN:
                 telemetry.addData("Position", "ERR");
                 goldPosition = VisionDecoder.Position.CENTER;  // DEFAULT
                 break;
@@ -64,13 +59,15 @@ public class FullAuto extends LinearOpMode {
 
         auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 100);  // UNHOOK
 
-        auto.drive.turnAngle((float) -Math.PI/2.f, 0.75f);
+        auto.drive.turnAngle((float) -Math.PI/2.f, ROTATE_DRIVE_PWR);
         hw.lift.moveTo(0, 0.75f);
-        Thread.sleep(500);
+    }
+
+    protected void mineralOperation() throws InterruptedException {
 
         if (goldPosition == VisionDecoder.Position.CENTER) {
-            auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 680);
-            auto.drive.turnAngle((float) Math.PI, 0.75f);
+            //auto.drive.turnAngle(0.0611f, ROTATE_DRIVE_PWR);  // Small correction angle
+            auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, CENTER_MINERAL_DISTANCE+80);
         } else {
             auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 80);
             int moveSign;
@@ -85,36 +82,28 @@ public class FullAuto extends LinearOpMode {
             float mineralAlignAngle;
             int mineralDriveDistance;
             if (moveSign > 0) {  // LEFT
-                mineralAlignAngle = ((float) Math.PI/4.f)-0.1f;  // MEASURED ANGLE
-                mineralDriveDistance = 1015;
+                mineralAlignAngle = ((float) Math.PI/4.f)-0.2f;  // MEASURED ANGLE
+                mineralDriveDistance = LEFT_MINERAL_DISTANCE;
             } else {  // RIGHT
                 mineralAlignAngle = -0.4286f;  // MEASURED ANGLE
-                mineralDriveDistance = 750;
+                mineralDriveDistance = 720;
             }
-            auto.drive.turnAngle(mineralAlignAngle, 0.75f);
+            auto.drive.turnAngle(mineralAlignAngle, ROTATE_DRIVE_PWR);
             auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, mineralDriveDistance);
 
-            if (moveSign > 0) {  // LEFT
-                auto.drive.turnAngle(((float) Math.PI) / 2.f + 0.314f, 0.75f);
-                auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -450);
-            } else {  // RIGHT
-                auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -250);
-                auto.drive.turnAngle(-((float) Math.PI) / 4.f, 0.75f);
-                auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -1350);
-                auto.drive.turnAngle(-3.f*((float) Math.PI) / 4.f, 0.75f);
-
-                // SLAM WALL ALIGN
-                hw.drive.updateMotors(0.5f,0,0);
-                Thread.sleep(2000);
-                hw.drive.updateMotors(-0.5f,0,0);
-                Thread.sleep(500);
-                hw.drive.updateMotors(0f,0,0);
-
-                auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -1300);
-            }
-            auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 1600);
+            //  MINERAL HAS NOW BEEN PUSHED
         }
+    }
 
 
+    @Override
+    public void runOpMode() throws InterruptedException {
+        hw = new Hardware(hardwareMap);
+        auto = new Main(hw, this);
+        auto.enable();
+
+        initHW();
+
+        auto.waitForStart();
     }
 }

@@ -13,6 +13,7 @@ public class Retract extends LinearOpMode {
         Hardware r = new Hardware(hardwareMap);
 
         r.lift.moveTo(0, 0.5);
+        r.armAngle.moveTo(0, 1);
 
         waitForStart();
     }

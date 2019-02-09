@@ -115,9 +115,9 @@ public class TensorFlowObjectPositions extends LinearOpMode {
                       telemetry.addData("# Object Detected", updatedRecognitions.size());
                         for (Recognition recognition : updatedRecognitions) {
                           if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                            telemetry.addData("GOLD", recognition.getTop());
+                            telemetry.addData("GOLD", recognition.getBottom());
                           } else {
-                              telemetry.addData("SILVER", recognition.getTop());
+                              telemetry.addData("SILVER", recognition.getBottom());
                           }
                         }
                       telemetry.update();

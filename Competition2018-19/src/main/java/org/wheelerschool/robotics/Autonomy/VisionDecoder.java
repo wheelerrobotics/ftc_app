@@ -160,7 +160,7 @@ public class VisionDecoder {
                 if (r.getConfidence() < CONF_THRESH) {
                     updatedRecognitions.remove(idx);
                 } else if (hanging) {  // Conditions specific to hanging situation
-                    if (r.getBottom() < 150) { // This is roughly below the line of the crater, to remove/ignore all objects behind it
+                    if (r.getBottom() < 215) { // This is roughly half line the line of the crater, to remove/ignore all objects behind it
                         updatedRecognitions.remove(idx);
                     }
                 }

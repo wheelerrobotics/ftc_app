@@ -3,6 +3,7 @@ package org.wheelerschool.robotics;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.bosch.NaiveAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -17,6 +18,9 @@ import org.wheelerschool.robotics.robotlib.motion.ServoTwoPos;
 import org.wheelerschool.robotics.robotlib.motion.SyncedServo;
 
 public class Hardware {
+    // Hardware characteristics:
+    public double ARM_EXT_POWER = 0.75f;
+
     public HardwareMap hw;
 
     // Drive:
@@ -24,7 +28,7 @@ public class Hardware {
     public MechanumDrive4x drive;
 
     // Arm:
-    public DcMotor armAngle;
+    public PositionalMotor armAngle;
     public PositionalMotor armExt;
 
     // End-fixture:
@@ -74,10 +78,12 @@ public class Hardware {
 
 
         // Arm:
-        armAngle = hw.dcMotor.get("armAngle");
+        armAngle = new PositionalMotor(hw.dcMotor.get("armAngle"), new int[]{-150, 980, 1576});
+        armAngle.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armAngle.dcMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         armExt = new PositionalMotor(hw.dcMotor.get("armExt"), new int[]{0});
         armExt.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        armExt.dcMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        armExt.dcMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Intake:
         //  Angle:
@@ -95,11 +101,13 @@ public class Hardware {
         intakeDrive.add(intakeR);
 
         // Lift:
-        lift = new PositionalMotor(hw.dcMotor.get("lift"), new int[]{0, 6290});
+        lift = new PositionalMotor(hw.dcMotor.get("lift"), new int[]{0, 6125});
         lift.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Drop:
-        drop = new ServoTwoPos(hw.servo.get("drop"), 0, 180);
+        drop = new ServoTwoPos(hw.servo.get("drop"), 0, 0.5);
+        drop.s.setDirection(Servo.Direction.REVERSE);
+
     }
 
     private void SensorConfig(HardwareMap hw) {

@@ -18,6 +18,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 public class Main {
     Hardware r;
+    LinearOpMode opMode;
 
     public VisionLocator locator;
     public VisionDecoder decoder;
@@ -45,6 +46,7 @@ public class Main {
     /** Constructor */
     public Main(Hardware robot, LinearOpMode linearOpMode) {
         this.r = robot;
+        this.opMode = linearOpMode;
 
         drive = new Drive(r, linearOpMode);
         setupVision();
@@ -55,5 +57,13 @@ public class Main {
         this.locator.enable();
         this.decoder.enable();
         //r.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+    }
+
+    /** Custom `waitForStart()` method to prevent Moto G5 disconnect */
+    public void waitForStart() {
+        while (!opMode.opModeIsActive() && !opMode.isStopRequested()) {
+            opMode.telemetry.addData("STATUS", "waiting for start...");
+            opMode.telemetry.update();
+        }
     }
 }
