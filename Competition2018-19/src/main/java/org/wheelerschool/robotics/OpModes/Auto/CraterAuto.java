@@ -37,6 +37,7 @@ public class CraterAuto extends BaseAuto {
     }
 
     protected void parkInCrater() {
+        auto.drive.turnAngle(0.1f, ROTATE_DRIVE_PWR);  // ENSURE NO COLLISION BETWEEN ALLIANCE MINERALS
         auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 1400);
         hw.armAngle.moveTo(-1, 1f);
     }

@@ -13,12 +13,12 @@ public abstract class BaseAuto extends LinearOpMode {
     public int CENTER_MINERAL_DISTANCE;
     public int LEFT_MINERAL_DISTANCE;
 
-    Hardware hw;
-    Main auto;
+    protected Hardware hw;
+    protected Main auto;
 
-    VisionDecoder.Position goldPosition = null;
+    protected VisionDecoder.Position goldPosition = null;
 
-    private void initHW() {
+    protected void initHW() {
         hw.armExt.moveTo(0, 0.5);
         hw.armAngle.moveTo(0, 0.5);
         hw.lift.moveTo(0, 0.5);
@@ -28,26 +28,27 @@ public abstract class BaseAuto extends LinearOpMode {
     protected void stageDrop() throws InterruptedException {
         VisionDecoder.Position goldCam = null;
         for (int i=0; i<50; i++) {
-            goldCam = auto.decoder.frameDetectedDualMineral(true);
+            goldCam = auto.decoder.frameDetectedLowestDualMineral();
 
             if (goldCam != VisionDecoder.Position.UNKNOWN) break;
+            telemetry.update();
         }
 
         switch (goldCam) {  // Position in field
             case LEFT:
-                telemetry.addData("Position", "LEFT");
+                telemetry.addData("drive to", "LEFT");
                 goldPosition = VisionDecoder.Position.LEFT;
                 break;
             case RIGHT:
-                telemetry.addData("Position", "CENTER");
+                telemetry.addData("drive to", "CENTER");
                 goldPosition = VisionDecoder.Position.CENTER;
                 break;
             case NONE:
-                telemetry.addData("Position", "RIGHT");
+                telemetry.addData("drive to", "RIGHT");
                 goldPosition = VisionDecoder.Position.RIGHT;
                 break;
             case UNKNOWN:
-                telemetry.addData("Position", "ERR");
+                telemetry.addData("drive to", "ERR (CENTER)");
                 goldPosition = VisionDecoder.Position.CENTER;  // DEFAULT
                 break;
         }

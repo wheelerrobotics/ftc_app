@@ -19,7 +19,8 @@ import org.wheelerschool.robotics.robotlib.motion.SyncedServo;
 
 public class Hardware {
     // Hardware characteristics:
-    public double ARM_EXT_POWER = 0.75f;
+    public double INTAKE_UP_POWER = 0.75f;
+    public double INTAKE_DOWN_POWER = 0.4f;
 
     public HardwareMap hw;
 

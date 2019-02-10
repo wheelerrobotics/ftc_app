@@ -1,6 +1,7 @@
 package org.wheelerschool.robotics.Autonomy;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -36,18 +37,21 @@ public class VisionDecoder {
     }
 
     private TFObjectDetector tfod;
+    private OpMode opMode;
 
     /**
      * Constructor
      * @param locator: Existing VisionLocator object
      */
-    public VisionDecoder(HardwareMap hw, VisionLocator locator) {
+    public VisionDecoder(HardwareMap hw, VisionLocator locator, OpMode opMode) {
         // USE: locator.vuforia
         int tfodMonitorViewId = hw.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hw.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, locator.vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+
+        this.opMode = opMode;
     }
 
     /**
@@ -155,16 +159,19 @@ public class VisionDecoder {
 
         // Filter objects below threshold:
         if (updatedRecognitions != null) {
+            opMode.telemetry.addData("Recogs", updatedRecognitions.size());
             for (int idx = updatedRecognitions.size() - 1; idx >= 0; idx--) {
                 Recognition r = updatedRecognitions.get(idx);
                 if (r.getConfidence() < CONF_THRESH) {
                     updatedRecognitions.remove(idx);
                 } else if (hanging) {  // Conditions specific to hanging situation
-                    if (r.getBottom() < 215) { // This is roughly half line the line of the crater, to remove/ignore all objects behind it
+                    if (r.getBottom() < 260) { // This is roughly half line the line of the crater, to remove/ignore all objects behind it
                         updatedRecognitions.remove(idx);
                     }
                 }
             }
+
+            opMode.telemetry.addData("Filtered", updatedRecognitions.size());
 
             // Ensure only 2 objects were detected:
             Recognition left = null;
@@ -184,15 +191,91 @@ public class VisionDecoder {
                 }
 
                 if (left.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                    opMode.telemetry.addData("detected", "LEFT");
                     return Position.LEFT;
                 } else if (right.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                    opMode.telemetry.addData("detected", "RIGHT");
                     return Position.RIGHT;
                 } else {
+                    opMode.telemetry.addData("detected", "NEITHER");
                     return Position.NONE;
                 }
             }
         }
 
+        opMode.telemetry.addData("detected", "ERR");
+        return Position.UNKNOWN;
+    }
+
+    public Position frameDetectedLowestDualMineral() {
+        // Read recognized objects:
+        List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+
+        float CONF_THRESH = 0.3f;
+
+        // Filter objects below threshold:
+        if (updatedRecognitions != null) {
+            opMode.telemetry.addData("Recogs", updatedRecognitions.size());
+
+            for (int idx = updatedRecognitions.size() - 1; idx >= 0; idx--) {
+                Recognition r = updatedRecognitions.get(idx);
+                if (r.getConfidence() < CONF_THRESH) {
+                    updatedRecognitions.remove(idx);
+                }
+            }
+
+            opMode.telemetry.addData("Filtered", updatedRecognitions.size());
+
+            if (updatedRecognitions.size()>=2) {
+                Recognition[] allLowestRecogs = new Recognition[2];
+
+                for (int lowestSaveIdx = 0; lowestSaveIdx < allLowestRecogs.length; lowestSaveIdx++) {
+                    int lowestIdx = 0;
+                    allLowestRecogs[lowestSaveIdx] = updatedRecognitions.get(lowestIdx);
+                    for (int idx = 1; idx < updatedRecognitions.size(); idx++) {  //
+                        // Save recognitions for easy use:
+                        Recognition newR = updatedRecognitions.get(idx);
+                        Recognition lowestR = allLowestRecogs[lowestSaveIdx];
+
+                        if (lowestR == null || newR.getBottom() > lowestR.getBottom()) {  // Save if lower than last (GREATER Y VALUE)
+                            allLowestRecogs[lowestSaveIdx] = updatedRecognitions.get(idx);
+                            lowestIdx = idx;
+                        }
+                    }
+                    updatedRecognitions.remove(lowestIdx);
+                }
+
+
+                // Ensure only 2 objects were detected:
+                Recognition left = null;
+                Recognition right = null;
+                for (Recognition r : allLowestRecogs) {
+                    if (left == null) {
+                        left = r;
+                    } else {
+                        if (left.getLeft() > r.getLeft()) {
+                            right = left;
+                            left = r;
+                        } else {
+                            right = r;
+                        }
+                    }
+                }
+
+                if (left.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                    opMode.telemetry.addData("detected", "LEFT");
+                    return Position.LEFT;
+                } else if (right.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                    opMode.telemetry.addData("detected", "RIGHT");
+                    return Position.RIGHT;
+                } else {
+                    opMode.telemetry.addData("detected", "NEITHER");
+                    return Position.NONE;
+                }
+            }
+        }
+
+        opMode.telemetry.addData("detected", "ERR");
         return Position.UNKNOWN;
     }
 

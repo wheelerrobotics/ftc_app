@@ -20,6 +20,7 @@ public class BasicControlTeleOp extends OpMode {
 
     // Joystick:
     CumulativeControl intakeAngle;
+    JoystickButtonUpdated intakeCtl;
     JoystickButtonUpdated angleUp;
     JoystickButtonUpdated angleDown;
 
@@ -43,6 +44,12 @@ public class BasicControlTeleOp extends OpMode {
         robot.lift.dcMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         intakeAngle = new CumulativeControl(0);
 
+        intakeCtl = new JoystickButtonUpdated(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return gamepad1.a;
+            }
+        });
         angleUp = new JoystickButtonUpdated(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
@@ -59,36 +66,30 @@ public class BasicControlTeleOp extends OpMode {
 
     @Override
     public void loop() {
-        telemetry.addData("x", gamepad1.left_stick_x);
-        telemetry.addData("y", gamepad1.left_stick_y);
-        telemetry.addData("rot", gamepad1.right_stick_x);
-        telemetry.addData("arm angle", robot.armAngle.dcMotor.getCurrentPosition());
-        robot.drive.updateMotors(gamepad1.left_stick_x, -gamepad1.left_stick_y, -gamepad1.right_stick_x);
-        //robot.drive.calcDrive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
-
         if (angleUp.getValueIgnoreException().newStateTrue) {
-            robot.armAngle.moveRel(-1, robot.ARM_EXT_POWER);
+            robot.armAngle.moveRel(-1, robot.INTAKE_UP_POWER);
         } else if (angleDown.getValueIgnoreException().newStateTrue) {
-            robot.armAngle.moveRel(1, robot.ARM_EXT_POWER);
+            robot.armAngle.moveTo(-1, robot.INTAKE_DOWN_POWER);
         } else {
             robot.armAngle.manualOverride(gamepad2.left_stick_y);
         }
 
 
+        int armExtPos = robot.armExt.dcMotor.getCurrentPosition();
+
         float armExtCtl = -gamepad2.right_stick_y;
+
+        /*if (armExtPos < 100) {
+            //armExtCtl = 0;
+        }*/
         if (armExtCtl > 0) {
             armExtStopPos = null;
             robot.armExt.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             armExtCtl *= 2. / 3.;
-        } else if (robot.armExt.dcMotor.getCurrentPosition() < 100) {
-            armExtCtl = 0;
-        } else if (armExtCtl == 0 || robot.armExt.dcMotor.getCurrentPosition() < 0) {
-            if (robot.armExt.dcMotor.getCurrentPosition() < 0) {
-                telemetry.addData("state", "force stop");
-            }
+        } else if (armExtCtl == 0) {
             if (armExtStopPos == null) {
                 armExtStopPos = robot.armExt.dcMotor.getCurrentPosition();
-                if (armExtStopPos < 0) {
+                if (armExtStopPos < 0 && false) {
                     armExtStopPos = 0;
                 }
             }
@@ -105,6 +106,12 @@ public class BasicControlTeleOp extends OpMode {
         telemetry.addData("arm", armExtCtl);
         robot.armExt.manualOverride(armExtCtl);
 
+        float rotGain = 1;
+
+        if (armExtPos > 500) {
+            rotGain = 0.5f;
+        }
+
 
         // Intake Angle:
         float angleCtl = gamepad2.right_trigger - gamepad2.left_trigger;
@@ -115,10 +122,12 @@ public class BasicControlTeleOp extends OpMode {
 
         // Intake Drive:
         double intakeDrive = INTAKE_POWER;
-        if (gamepad1.y) {}
-        else if (gamepad1.a) {
+        JoystickButtonUpdated.JoystickButtonData intakeIn = intakeCtl.getValueIgnoreException();
+        if (gamepad1.y) {
+            intakeCtl.lastFlipStateValue = false;
             intakeDrive = -intakeDrive;
-        } else {
+        }
+        else if (!intakeIn.flipStateValue) {
             intakeDrive = 0;
         }
 
@@ -144,6 +153,14 @@ public class BasicControlTeleOp extends OpMode {
         } else {
             robot.drop.setState(false);
         }
+
+        // DRIVE:
+        telemetry.addData("x", gamepad1.left_stick_x);
+        telemetry.addData("y", gamepad1.left_stick_y);
+        telemetry.addData("rot", gamepad1.right_stick_x);
+        telemetry.addData("arm angle", robot.armAngle.dcMotor.getCurrentPosition());
+        robot.drive.updateMotors(gamepad1.left_stick_x, -gamepad1.left_stick_y, -gamepad1.right_stick_x * rotGain);
+        //robot.drive.calcDrive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
 
         debugPrint();
     }

@@ -38,7 +38,7 @@ public class Main {
                         90, 0, 0));
 
         this.locator = new VisionLocator(this.r.hw, cameraOffset);
-        this.decoder = new VisionDecoder(this.r.hw, this.locator);
+        this.decoder = new VisionDecoder(this.r.hw, this.locator, opMode);
     }
 
 
