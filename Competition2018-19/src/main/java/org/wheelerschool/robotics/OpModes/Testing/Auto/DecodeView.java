@@ -74,6 +74,7 @@ public class DecodeView extends LinearOpMode {
                         //telemetry.addData("pos", "err");
                         break;
                 }
+                telemetry.update();
             }
         }
     }

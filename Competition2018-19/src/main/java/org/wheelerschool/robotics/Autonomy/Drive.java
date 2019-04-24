@@ -89,6 +89,8 @@ public class Drive {
                     atTarget = false;
                 }
             }
+            linearOpMode.telemetry.addData("STATE", "driving...");
+            linearOpMode.telemetry.update();
         }
 
         for (DcMotor m : motors) {
