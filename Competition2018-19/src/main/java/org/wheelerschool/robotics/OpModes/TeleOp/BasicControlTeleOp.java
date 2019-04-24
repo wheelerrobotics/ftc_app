@@ -79,13 +79,12 @@ public class BasicControlTeleOp extends OpMode {
 
         float armExtCtl = -gamepad2.right_stick_y;
 
-        /*if (armExtPos < 100) {
-            //armExtCtl = 0;
-        }*/
         if (armExtCtl > 0) {
             armExtStopPos = null;
             robot.armExt.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             armExtCtl *= 2. / 3.;
+        } else if (armExtPos < 100) {
+            armExtCtl = 0;
         } else if (armExtCtl == 0) {
             if (armExtStopPos == null) {
                 armExtStopPos = robot.armExt.dcMotor.getCurrentPosition();
