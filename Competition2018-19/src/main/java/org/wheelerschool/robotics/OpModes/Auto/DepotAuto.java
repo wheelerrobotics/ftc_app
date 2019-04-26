@@ -25,17 +25,17 @@ public class DepotAuto extends BaseAuto {
             auto.drive.turnAngle(-((float) Math.PI) / 4.f, 0.75f);
             auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -600);  // WALL SLAM
             auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 120);
-            auto.drive.turnAngle(-((float) Math.PI) / 2.f, 0.75f);
-            auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -1100);
+            auto.drive.turnAngle(-((float) Math.PI) / 2.f + 0.05f, 0.75f);
+            auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -1050);
         }
 
-        hw.drop.setState(true);
+        markerOperation();
         auto.drive.turnAngle(-0.1f, ROTATE_DRIVE_PWR); // ensure miss of other minerals
     }
 
     protected void parkInCrater() {
-        auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 1600);
-        hw.armAngle.moveTo(-1, 1f);
+        auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 1750);
+        //hw.armAngle.moveTo(-1, 1f);
     }
 
     @Override

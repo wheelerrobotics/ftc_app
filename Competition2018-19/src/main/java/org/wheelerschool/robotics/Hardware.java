@@ -42,6 +42,9 @@ public class Hardware {
     // Drop:
     public ServoTwoPos drop;
 
+    // Team Marker
+    public ServoTwoPos marker;
+
     // Robot IMU:
     public BNO055IMU imu;
 
@@ -95,20 +98,26 @@ public class Hardware {
 
         //  Drive:
         intakeDrive = new MotorGroup();
-        CRServo intakeL = hw.crservo.get("intakeL");
-        intakeL.setDirection(DcMotorSimple.Direction.REVERSE);
+        /*CRServo intakeL = hw.crservo.get("intakeL");
+        //intakeL.setDirection(DcMotorSimple.Direction.REVERSE);
         CRServo intakeR = hw.crservo.get("intakeR");
         intakeDrive.add(intakeL);
-        intakeDrive.add(intakeR);
+        intakeDrive.add(intakeR);*/
+        DcMotor intake = hw.dcMotor.get("intake");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeDrive.add(intake);
 
         // Lift:
         lift = new PositionalMotor(hw.dcMotor.get("lift"), new int[]{0, 6125});
         lift.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Drop:
-        drop = new ServoTwoPos(hw.servo.get("drop"), 0, 0.5);
+        drop = new ServoTwoPos(hw.servo.get("drop"), 0.5, 0);
         drop.s.setDirection(Servo.Direction.REVERSE);
 
+        // Team Marker:
+        marker = new ServoTwoPos(hw.servo.get("marker"), 0.25, 1);
+        marker.s.setDirection(Servo.Direction.FORWARD);
     }
 
     private void SensorConfig(HardwareMap hw) {

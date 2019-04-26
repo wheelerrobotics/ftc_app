@@ -30,16 +30,17 @@ public class CraterAuto extends BaseAuto {
 
         auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -280);
         auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 120);
-        auto.drive.turnAngle(((float)Math.PI)/2, ROTATE_DRIVE_PWR);
+        auto.drive.turnAngle(((float)Math.PI)/2-0.15f, ROTATE_DRIVE_PWR);
         auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -1120);
 
-        hw.drop.setState(true);
+
+        markerOperation();
     }
 
     protected void parkInCrater() {
         auto.drive.turnAngle(0.1f, ROTATE_DRIVE_PWR);  // ENSURE NO COLLISION BETWEEN ALLIANCE MINERALS
-        auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 1400);
-        hw.armAngle.moveTo(-1, 1f);
+        auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 1550);
+        //hw.armAngle.moveTo(-1, 1f);
     }
 
     @Override

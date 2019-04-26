@@ -71,7 +71,12 @@ public class BasicControlTeleOp extends OpMode {
         } else if (angleDown.getValueIgnoreException().newStateTrue) {
             robot.armAngle.moveTo(-1, robot.INTAKE_DOWN_POWER);
         } else {
-            robot.armAngle.manualOverride(gamepad2.left_stick_y);
+            // (4^x - 1)/(4-1)
+            final int SCALE_CONST = 4;
+            float armAnglePwr = gamepad2.left_stick_y;
+            armAnglePwr = Math.copySign(((float)Math.pow(SCALE_CONST, Math.abs(armAnglePwr)) - 1)/(SCALE_CONST-1), armAnglePwr);
+            robot.armAngle.manualOverride(armAnglePwr);
+            telemetry.addData("Arm Angle Manual", armAnglePwr);
         }
 
 
@@ -152,6 +157,9 @@ public class BasicControlTeleOp extends OpMode {
         } else {
             robot.drop.setState(false);
         }
+
+        // Team Marker
+        robot.marker.setState(gamepad1.x);
 
         // DRIVE:
         telemetry.addData("x", gamepad1.left_stick_x);

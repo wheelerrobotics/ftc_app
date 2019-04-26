@@ -9,9 +9,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.wheelerschool.robotics.Hardware;
 
+import java.util.Arrays;
+
 public class Drive {
     float ANGLE_DB = 1.f * (float) Math.PI/180.f;  // Angle deadband (deg)
     float ANGLE_MAX = 30.f * (float) Math.PI/180.f;  // Angle separation for which max rotation is applied (deg)
+    float MIN_PWR = 0.3f;
     int ENC_DEADBAND = 10;
     float ENC_SCALE = 10000.f/2775.f;  // 10^4 enc ticks per 2775mm
     AxesOrder IMU_ORDER = AxesOrder.ZYX;
@@ -45,7 +48,7 @@ public class Drive {
         } else if (Math.abs(sep) < this.ANGLE_DB) {
             power = 0;
         } else {
-            power = sep / this.ANGLE_MAX;
+            power = (1-MIN_PWR)*(sep / this.ANGLE_MAX) + Math.copySign(MIN_PWR, sep);
         }
 
         Log.d("auto", String.format("change: %f, delta: %f, power: %f", currentChange, sep, power));
@@ -60,7 +63,10 @@ public class Drive {
         do {
             Log.d("auto", "Here");
             power = anglePower(start, angle) * gain;
-            r.drive.updateMotors(0, 0, power);
+            r.drive.updateMotors(0, 0, power);  // TODO: What a roller coaster
+            //double[] mV = r.drive.updateMotors(power*0.4f/1.f, 0, power*0.6f/1.f);  // TODO: Cludgy fix for broken mechanum -- remove (DON'T PUSH)
+            //Log.d("ANGLE DRIVE", Arrays.toString(mV));
+
         } while (power != 0 && linearOpMode.opModeIsActive());
 
         hault();
