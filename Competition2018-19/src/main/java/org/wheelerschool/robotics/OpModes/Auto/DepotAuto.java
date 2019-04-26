@@ -25,7 +25,7 @@ public class DepotAuto extends BaseAuto {
             auto.drive.turnAngle(-((float) Math.PI) / 4.f, 0.75f);
             auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -600);  // WALL SLAM
             auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 120);
-            auto.drive.turnAngle(-((float) Math.PI) / 2.f + 0.05f, 0.75f);
+            auto.drive.turnAngle(-((float) Math.PI) / 2.f + 0.1f, 0.75f);
             auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, -1050);
         }
 

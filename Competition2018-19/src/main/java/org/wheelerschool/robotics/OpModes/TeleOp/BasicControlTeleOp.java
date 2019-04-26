@@ -1,5 +1,7 @@
 package org.wheelerschool.robotics.OpModes.TeleOp;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -26,6 +28,7 @@ public class BasicControlTeleOp extends OpMode {
 
     // Control
     Integer armExtStopPos;
+    Integer armAngStopPos;
 
     public BasicControlTeleOp() {
         super();
@@ -66,54 +69,79 @@ public class BasicControlTeleOp extends OpMode {
 
     @Override
     public void loop() {
-        if (angleUp.getValueIgnoreException().newStateTrue) {
-            robot.armAngle.moveRel(-1, robot.INTAKE_UP_POWER);
-        } else if (angleDown.getValueIgnoreException().newStateTrue) {
-            robot.armAngle.moveTo(-1, robot.INTAKE_DOWN_POWER);
-        } else {
-            // (4^x - 1)/(4-1)
-            final int SCALE_CONST = 4;
-            float armAnglePwr = gamepad2.left_stick_y;
-            armAnglePwr = Math.copySign(((float)Math.pow(SCALE_CONST, Math.abs(armAnglePwr)) - 1)/(SCALE_CONST-1), armAnglePwr);
-            robot.armAngle.manualOverride(armAnglePwr);
-            telemetry.addData("Arm Angle Manual", armAnglePwr);
-        }
-
-
+        // Arm Ext:
         int armExtPos = robot.armExt.dcMotor.getCurrentPosition();
 
-        float armExtCtl = -gamepad2.right_stick_y;
+        boolean armRetr = false;
+        Float armExtCtl = -gamepad2.right_stick_y;
 
         if (armExtCtl > 0) {
             armExtStopPos = null;
             robot.armExt.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            armExtCtl *= 2. / 3.;
+            armExtCtl *= 2.f / 3.f;
         } else if (armExtPos < 100) {
-            armExtCtl = 0;
+            armExtStopPos = null;
+            armRetr = true;
+            armExtCtl = 0f;
         } else if (armExtCtl == 0) {
             if (armExtStopPos == null) {
                 armExtStopPos = robot.armExt.dcMotor.getCurrentPosition();
-                if (armExtStopPos < 0 && false) {
-                    armExtStopPos = 0;
-                }
+                robot.armExt.dcMotor.setTargetPosition(armExtStopPos);
+                robot.armExt.dcMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.armAngle.dcMotor.setPower(1/.4f);
             }
-            robot.armExt.dcMotor.setTargetPosition(armExtStopPos);
-            robot.armExt.dcMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            armExtCtl = 1/8.f;
+            armExtCtl = null;
         } else if (armExtCtl < 0) {
             armExtStopPos = null;
             robot.armExt.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             //robot.armExt.setTargetPosition(0);
             //robot.armExt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            armExtCtl *= 1.;
+            armExtCtl *= 1.f;
         }
+
         telemetry.addData("arm", armExtCtl);
-        robot.armExt.manualOverride(armExtCtl);
+        if (armExtStopPos == null) {
+            robot.armExt.manualOverride(armExtCtl);
+        }
 
         float rotGain = 1;
 
         if (armExtPos > 500) {
             rotGain = 0.5f;
+        }
+
+        // Arm Angle:
+
+        if (angleUp.getValueIgnoreException().newStateTrue) {
+            armAngStopPos = null;
+            robot.armAngle.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.armAngle.moveRel(-1, robot.INTAKE_UP_POWER);
+        } else if (angleDown.getValueIgnoreException().newStateTrue) {
+            armAngStopPos = null;
+            robot.armAngle.dcMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.armAngle.moveTo(-1, robot.INTAKE_DOWN_POWER);
+        } else {
+            // (4^x - 1)/(4-1)
+            final int SCALE_CONST = 4;
+            float armAnglePwr = gamepad2.left_stick_y;
+
+            if (armAnglePwr == 0 && !armRetr) {
+                if (armAngStopPos == null) {
+                    armAngStopPos = robot.armAngle.dcMotor.getCurrentPosition();
+                    robot.armAngle.dcMotor.setTargetPosition(armAngStopPos);
+                    robot.armAngle.dcMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    robot.armAngle.dcMotor.setPower(1.f);
+                }
+            } else {
+                armAngStopPos = null;
+                armAnglePwr = Math.copySign(((float)Math.pow(SCALE_CONST, Math.abs(armAnglePwr)) - 1)/(SCALE_CONST-1), armAnglePwr);
+                robot.armAngle.manualOverride(armAnglePwr);  // Should also unintentionally handle switchover from angle hold when `armRetr` goes true (and disables it)
+            }
+
+            telemetry.addData("Arm Angle Manual", armAnglePwr);
+            //if (armAngStopPos != null) {
+            //    Log.w("ACTUATOR HOLD", "ARM ANG STOP: ".concat(armAngStopPos.toString()).concat("; AT ").concat(Integer.toString(robot.armAngle.dcMotor.getCurrentPosition())));
+            //}
         }
 
 

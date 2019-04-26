@@ -60,7 +60,7 @@ public abstract class BaseAuto extends LinearOpMode {
 
         auto.drive.forwardDistance(STRAIGHT_DRIVE_PWR, 100);  // UNHOOK
 
-        auto.drive.turnAngle((float) -Math.PI/2.f+0.15f, ROTATE_DRIVE_PWR);
+        auto.drive.turnAngle((float) -Math.PI/2.f+0.2f, ROTATE_DRIVE_PWR);
         hw.lift.moveTo(0, 0.75f);
     }
 
@@ -86,7 +86,7 @@ public abstract class BaseAuto extends LinearOpMode {
                 mineralAlignAngle = ((float) Math.PI/4.f)-0.2f;  // MEASURED ANGLE
                 mineralDriveDistance = LEFT_MINERAL_DISTANCE;
             } else {  // RIGHT
-                mineralAlignAngle = -0.4286f;  // MEASURED ANGLE
+                mineralAlignAngle = -0.4786f;  // MEASURED ANGLE
                 mineralDriveDistance = 720;
             }
             auto.drive.turnAngle(mineralAlignAngle, ROTATE_DRIVE_PWR);
